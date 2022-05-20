@@ -42,15 +42,21 @@ for tag in soup.findAll("ROW"):  # "ROW" is the tag that is used for every row i
 
     # 2.D: Extract the text of interest:
     parsed_html = BeautifulSoup(html_raw, 'html.parser')
-    body_tag = parsed_html.findAll("body")[0]
-    main_list = body_tag.contents[0].contents
-    accident_text = main_list[5].text
-    # accident_text = main_list[7].text # idx=7 is "the cause of the accident determind by NTSB"
-    #accident_text = parsed_html.findAll("p")[21].text
 
-    # 2.E: Save the text of interest as a textfile with accident_id name:
-    file = open(target_folder + event_id + ".txt", 'w')
-    file.write(accident_text)
-    file.close()
+    try:
+        body_tag = parsed_html.findAll("body")[0]
+        main_list = body_tag.contents[0].contents
+        accident_text = main_list[5].text
+        # accident_text = main_list[7].text # idx=7 is "the cause of the accident determind by NTSB"
+        # accident_text = parsed_html.findAll("p")[21].text
+
+        # 2.E: Save the text of interest as a textfile with accident_id name:
+        file = open(target_folder + event_id + ".txt", 'w')
+        file.write(accident_text)
+        file.close()
+
+    except IndexError:
+        print("No report found for the given identifiers:  " + event_id)
+        continue
 
 fd.close()  # Close the XML file
