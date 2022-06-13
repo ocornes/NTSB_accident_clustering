@@ -1,6 +1,6 @@
 # Necessary Imports:
 import sys
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import requests
 import os
 from tqdm import tqdm
@@ -12,8 +12,8 @@ ACCIDENT_TO_BE_ = "The National Transportation Safety Board determines the proba
 INCIDENT_TO_BE_ = "The National Transportation Safety Board determines the probable cause(s) of this incident to be:"
 
 default_input = 'test_55_hits.xml'  # The xml file containing all the accidents
-target_folder = 'dataset/'
-overwrite = True
+target_folder = 'dataset_extended/'
+overwrite = False
 error_file = 'error.xml'
 
 # Get XML input file
@@ -82,14 +82,23 @@ for tag in tqdm(tags):
         main_section = body_tag.contents[0].contents
 
         report_elements = []
+        buffer = Tag(name='p')
         for report_tag in main_section[4:]:  # First 4 elements are report header
-            # If tag is a section header or is not empty
-            if report_tag.name == 'h2' or \
-                    report_tag.text != '' and report_tag.text != ' ':
+            # If tag is a section header
+            if report_tag.name == 'h2':
+                if buffer.text != '':
+                    report_elements.append(buffer)
+                    buffer = Tag(name='p')
                 report_elements.append(report_tag)
-                # If tag is table, it's the Findings section
-                if report_tag.name == 'table':
-                    break
+            # If tag is table, it's the Findings section
+            elif report_tag.name == 'table':
+                if buffer.text != '':
+                    report_elements.append(buffer)
+                report_elements.append(report_tag)
+                break
+            # Otherwise, a 'p' tag - merge all consecutive 'p' tags
+            elif report_tag.text != '' and report_tag.text != ' ':
+                buffer.insert(10, report_tag.text + ' ')  # maximum of 10 paragraph elements (arbitrary)
 
         # The report_elements should contain:
         # Analysis header, Analysis section,
