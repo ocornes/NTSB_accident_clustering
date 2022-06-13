@@ -7,6 +7,8 @@ from tqdm import tqdm
 
 from Output_errors import output_errors
 
+ACCIDENT_TO_BE_ = "The National Transportation Safety Board determines the probable cause(s) of this accident to be:"
+
 default_input = 'test_55_hits.xml'  # The xml file containing all the accidents
 target_folder = 'dataset/'
 overwrite = True
@@ -42,6 +44,7 @@ if len(tags) == 0:
 
 false_ids = []  # 404 error, report doesn't exist
 malformed_ids = []  # report has blank sections in expected positions
+cause_malformed_ids = []  # probable cause doesn't start with correct header
 unknown_errors = []  # ids that failed for unknown reasons
 
 # URL for NTSB api
@@ -71,16 +74,24 @@ for tag in tqdm(tags):
     try:
         body_tag = parsed_html.findAll("body")[0]
         main_list = body_tag.contents[0].contents
-        analysis_text = main_list[5].text  # 5th element is the accident description
 
+        analysis_text = main_list[5].text  # 5th element is the accident description
         if analysis_text == ' ':
             # malformed report, fix manually
             malformed_ids.append(event_id)
             continue
 
+        probable_cause_text = main_list[7].text  # 7th element is the probable cause
+        if not probable_cause_text.startswith(ACCIDENT_TO_BE_):
+            # malformed report, fix manually
+            cause_malformed_ids.append(event_id)
+            continue
+        probable_cause_text = '\n' + probable_cause_text[len(ACCIDENT_TO_BE_):]
+
         # Save the text of interest as a textfile with accident_id name:
         file = open(target_folder + event_id + ".txt", 'w')
         file.write(analysis_text)
+        file.write(probable_cause_text)
         file.close()
 
     except Exception as e:
@@ -92,4 +103,5 @@ fd.close()  # Close the XML file
 output_errors(error_file=error_file,
               unknown=unknown_errors,
               malformed=malformed_ids,
+              cause_malformed=cause_malformed_ids,
               not_found=false_ids)
