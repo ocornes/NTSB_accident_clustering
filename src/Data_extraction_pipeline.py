@@ -64,7 +64,11 @@ for tag in tqdm(tags):
         continue
 
     # Fetch the HTML file:
-    html_raw = requests.get(url=(url + event_id)).text
+    try:
+        html_raw = requests.get(url=(url + event_id)).text
+    except Exception as e:
+        unknown_errors.append((event_id, e))
+        continue
 
     # Check for 404
     if html_raw == NO_REPORT:
@@ -106,7 +110,7 @@ for tag in tqdm(tags):
             # malformed report, fix manually
             cause_malformed_ids.append(event_id)
             continue
-        probable_cause_text = '\n' + probable_cause_text[len(ACCIDENT_TO_BE_):]
+        probable_cause_text = probable_cause_text[len(ACCIDENT_TO_BE_):]
 
         # Parse Findings section (in table form)
         findings_table = report_elements[4]
@@ -125,7 +129,9 @@ for tag in tqdm(tags):
         # Save the text of interest as a textfile with accident_id name:
         file = open(target_folder + event_id + ".txt", 'w')
         file.write(analysis_text)
+        file.write('\n')
         file.write(probable_cause_text)
+        file.write('\n')
         file.write(findings_text)
         file.close()
 
