@@ -35,3 +35,7 @@ def id_to_file(fd, failed_id, reason, additional=''):
         if additional != '':
             reason = f"{reason}, ({additional})"
         fd.write(f"<ROW EventId=\"{failed_id}\" Reason=\"{reason}\"/>\n")
+
+
+def parse_findings(findings):
+    return ''
