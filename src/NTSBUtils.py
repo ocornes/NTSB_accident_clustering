@@ -37,20 +37,23 @@ def id_to_file(fd, failed_id, reason, additional=''):
         fd.write(f"<ROW EventId=\"{failed_id}\" Reason=\"{reason}\"/>\n")
 
 
-DEAD_TOKENS = ['- ', '(C)', '(F)', '(S)']
+DEAD_TOKENS = ['(C)', '(F)', '(S)']
 
 
 def parse_findings(findings):
-    result = ''
+    result = []
     for line in findings:
         colon = line.rfind(':')
         dot = line.rfind('.')
         if colon != -1:
-            result += line[colon + 2:]
+            result.append(replace_dead(line[colon + 1:]).strip())
         elif dot != -1:
-            result += line[dot + 2:]
+            result.append(replace_dead(line[dot + 1:]).strip())
 
+    return result
+
+
+def replace_dead(a):
     for tok in DEAD_TOKENS:
-        result = result.replace(tok, '')
-
-    return result.lower()
+        a = a.replace(tok, ' ')
+    return a

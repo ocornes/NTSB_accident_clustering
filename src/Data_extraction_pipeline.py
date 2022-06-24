@@ -12,8 +12,8 @@ ACCIDENT_TO_BE_ = "The National Transportation Safety Board determines the proba
 INCIDENT_TO_BE_ = "The National Transportation Safety Board determines the probable cause(s) of this incident to be:"
 
 default_input = 'test_55_hits.xml'  # The xml file containing all the accidents
-target_folder = 'dataset_extended/'
-overwrite = False
+target_folder = 'dataset'
+overwrite = True
 error_file = 'error.xml'
 
 # Get XML input file
@@ -28,11 +28,16 @@ if not os.path.exists(XML_filename):
     print(f"[!] Could not find file '{XML_filename}'")
     exit(-1)
 
-# Create output directory if it doesn't exist
+# Create output directories if they don't exist
 if not os.path.exists(target_folder):
     os.mkdir(target_folder)
 else:
     print(f"[i] Target directory '{target_folder}' already exists, not creating folder.")
+
+if not os.path.exists(target_folder + "_findings"):
+    os.mkdir(target_folder + "_findings")
+else:
+    print(f"[i] Target directory '{target_folder}_findings' already exists, not creating folder.")
 
 # Fetching the accident ID list from XML file
 fd = open(XML_filename, 'r')
@@ -136,12 +141,17 @@ for tag in tqdm(tags):
             continue
 
         # Save the text of interest as a textfile with accident_id name:
-        file = open(target_folder + event_id + ".txt", 'w')
+        file = open(target_folder + "/" + event_id + ".txt", 'w')
         file.write(analysis_text)
         file.write('\n')
         file.write(probable_cause_text)
-        file.write('\n')
-        file.write(findings_text)
+        # file.write('\n')
+        # file.write(findings_text)
+        file.close()
+
+        # Save findings
+        file = open(target_folder + "_findings/" + event_id + ".txt", 'w')
+        file.write(str(findings_text))
         file.close()
 
     except Exception as e:
