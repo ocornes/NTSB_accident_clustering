@@ -1,3 +1,8 @@
+from os import listdir, path
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+
+
 def output_errors(**kwargs):
     # Args
     error_file = kwargs.get("error_file") or ''
@@ -57,3 +62,37 @@ def replace_dead(a):
     for tok in DEAD_TOKENS:
         a = a.replace(tok, ' ')
     return a
+
+
+def get_docs(dir, line=0, additional_stop_words=[]):
+    if not path.isdir(dir):
+        print(f"[!] Directory '{dir}' could not be found")
+        return []
+
+    # get list of stopwords
+    stops = stopwords.words('english')
+
+    docs = []
+    for f in listdir(dir):
+        fd = open(dir + f)
+        doc = fd.readlines()[line]
+        doc = [word for word in word_tokenize(doc.lower()) if
+               word.isalnum() and word not in stops and word not in additional_stop_words]
+        docs.append(doc)
+        fd.close()
+    return docs
+
+
+def get_topics_lists(model, top_clusters, n_words):
+    topics = []
+    for cluster in top_clusters:
+        sorted_dict = sorted(model.cluster_word_distribution[cluster].items(),
+                             key=lambda k: k[1], reverse=True)[:n_words]
+        topics.append([k for (k, v) in sorted_dict])
+    return topics
+
+
+def print_top_words(cluster_word_distribution, top_cluster, number_words):
+    for cluster in top_cluster:
+        sort_dicts = sorted(cluster_word_distribution[cluster].items(), key=lambda k: k[1], reverse=True)[:number_words]
+        print(f"Topic {cluster}: {sort_dicts}")
