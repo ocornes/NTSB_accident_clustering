@@ -1,6 +1,7 @@
 from os import listdir, path
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+from pickle import dump, load
 
 
 def output_errors(**kwargs):
@@ -83,10 +84,10 @@ def get_docs(dir, line=0, additional_stop_words=[]):
     return docs
 
 
-def get_topics_lists(model, top_clusters, n_words):
+def get_topics_lists(cluster_word_distribution, top_clusters, n_words):
     topics = []
     for cluster in top_clusters:
-        sorted_dict = sorted(model.cluster_word_distribution[cluster].items(),
+        sorted_dict = sorted(cluster_word_distribution[cluster].items(),
                              key=lambda k: k[1], reverse=True)[:n_words]
         topics.append([k for (k, v) in sorted_dict])
     return topics
@@ -96,3 +97,21 @@ def print_top_words(cluster_word_distribution, top_cluster, number_words):
     for cluster in top_cluster:
         sort_dicts = sorted(cluster_word_distribution[cluster].items(), key=lambda k: k[1], reverse=True)[:number_words]
         print(f"Topic {cluster}: {sort_dicts}")
+
+
+def print_topics(topics, top_clusters):
+    for i in range(len(topics)):
+        print(f"{top_clusters[i]},{','.join(topics[i])}")
+
+
+def export_model(model, file):
+    f = open(file, "wb")
+    dump(model, f)
+    f.close()
+
+
+def load_model(file):
+    f = open(file, "rb")
+    model = load(f)
+    f.close()
+    return model
