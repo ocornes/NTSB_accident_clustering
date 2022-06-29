@@ -4,12 +4,13 @@ import numpy as np
 from gsdmm import MovieGroupProcess
 from NTSBUtils import get_docs, get_topics_lists, print_top_words, print_topics, export_model, load_model
 
+LINE = 0
 NUMBER_TOPICS = 1
 OVERWRITE = True
 GSDMM_MODEL = f"results/gsdmm{NUMBER_TOPICS}.model"
 DATASET = "dataset_extended/"
 NUMBER_WORDS = 10
-ITER = 25
+ITER = 15
 ADDITIONAL_STOPS = ["airplane", "aircraft", "airline", "fly", "reported", "accrued", "common", "unit", "standard",
                     "flown", "faa"]
 
@@ -61,11 +62,11 @@ def calculate_coherence(topics, metric='u_mass'):
 
 if __name__ == "__main__":
     # load documents
-    docs = get_docs(DATASET, line=1, additional_stop_words=ADDITIONAL_STOPS)
+    docs = get_docs(DATASET, line=LINE, additional_stop_words=ADDITIONAL_STOPS)
 
     # create dictionary
     dictionary = gensim.corpora.Dictionary(docs)
-    dictionary.filter_extremes(no_below=15, no_above=0.5, keep_n=100000)
+    dictionary.filter_extremes(no_below=50, no_above=0.5, keep_n=100000)
 
     vocab_length = len(dictionary)
     print(f"Size of vocabulary: {vocab_length}")
@@ -74,11 +75,12 @@ if __name__ == "__main__":
     corpus = [dictionary.doc2bow(doc) for doc in docs]
 
     # topic sizes
-    Ks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 35, 40, 45, 50]
+    # Ks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 35, 40, 45, 50]
+    Ks = [1, 2, 3, 4, 5, 6, 7, 8]
 
     for number_topics in Ks:
         # generate or load model
-        gsdmm = generate_model(number_topics, f"results/gsdmm{number_topics}.model")
+        gsdmm = generate_model(number_topics, f"results/gsdmmA{number_topics}.model")
 
         # generate topics from model
         topics, indices = generate_topics(gsdmm)
@@ -87,4 +89,4 @@ if __name__ == "__main__":
 
         # Calculate coherence
         coherence = calculate_coherence(topics)
-        print(f"The GSDMM model ({NUMBER_TOPICS} topics) has a coherence of: {coherence}")
+        print(f"The GSDMM model ({number_topics} topics) has a coherence of: {coherence}")

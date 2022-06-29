@@ -51,9 +51,10 @@ def calculate_Ws(As, Bs):
 
 
 if __name__ == '__main__':
-    perms = get_perms(4)
     As = get_As()
     Bs = get_Bs()
+    _, topics = As.shape
+    perms = get_perms(topics)
     print("Calculating Ws...")
     Ws = calculate_Ws(As, Bs)
     print(Ws)
@@ -63,7 +64,7 @@ if __name__ == '__main__':
     print("Going through all permutations...")
     for p in tqdm(perms):
         tmp = 0
-        for i in range(4):
+        for i in range(topics):
             tmp = tmp + Ws[i, p(i)]
         if tmp > highest:
             highest = tmp
