@@ -3,6 +3,8 @@ from itertools import permutations
 import numpy as np
 from tqdm import tqdm
 
+from src.NTSBUtils import plot_Ws
+
 
 class Perm:
     def __init__(self, map):
@@ -40,7 +42,7 @@ def get_Bs():
 def calculate_Ws(As, Bs):
     n_docs, n_topics = As.shape
     Ws = np.empty((n_topics, n_topics))
-    log_Bs = np.log(Bs + 1e-12)
+    log_Bs = np.log(Bs + 1e-6)
     for i in tqdm(range(n_topics)):
         for j in range(n_topics):
             sum_over_d = 0
@@ -48,6 +50,17 @@ def calculate_Ws(As, Bs):
                 sum_over_d += As[d, i] * log_Bs[d, j]
             Ws[i, j] = sum_over_d
     return Ws
+
+
+def calculate_kl(p, As, Ws):
+    n_docs, n_topics = As.shape
+    log_As = np.log(As + 1e-6)
+    result = 0
+    for i in range(n_topics):
+        result -= Ws[i, p(i)]
+        for d in range(n_docs):
+            result += As[d, i] * log_As[d, i]
+    return result / n_docs
 
 
 if __name__ == '__main__':
@@ -70,5 +83,10 @@ if __name__ == '__main__':
             highest = tmp
             optimum_p = p
 
+    avg_kl = calculate_kl(optimum_p, As, Ws)
+
     print(f"Optimum permuation was: {optimum_p}")
     print(f"Highest score was: {highest}")
+    print(f"Lowest Average KL-Divergence: {avg_kl}")
+
+    # plot_Ws(Ws)

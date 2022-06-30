@@ -115,3 +115,23 @@ def load_model(file):
     model = load(f)
     f.close()
     return model
+
+
+def plot_Ws(Ws):
+    import seaborn as sn
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    mins = np.array([[-1.5, -1.5, -1.5, -1.5], [-2.7, -2.7, -2.7, -2.7],
+                     [-2.3, -2.3, -2.3, -2.3], [-1.1, -1.1, -1.1, -1.1]])
+    norms = np.array([[-0.78, -0.78, -0.78, -0.78], [-1.367, -1.367, -1.367, -1.367],
+                      [-1.127, -1.127, -1.127, -1.127], [-0.575, -0.575, -0.575, -0.575]])
+    Ws = np.maximum(Ws, mins)
+    Ws = Ws - norms
+    df_cm = pd.DataFrame(-Ws, index=range(4),
+                         columns=range(4))
+    plt.figure(figsize=(10, 7))
+    cmap = sn.dark_palette("#ffffff", as_cmap=True)
+    sn.heatmap(df_cm, cmap=cmap)
+    plt.show()
