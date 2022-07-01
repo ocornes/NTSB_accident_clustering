@@ -39,6 +39,11 @@ def get_Bs():
                      [0.2, 0.5, 0.3, 0.0]])
 
 
+def generate_random(topics, documents):
+    x = np.random.rand(documents, topics)
+    return x / np.sum(x, axis=1, keepdims=True)
+
+
 def calculate_Ws(As, Bs):
     n_docs, n_topics = As.shape
     Ws = np.empty((n_topics, n_topics))
