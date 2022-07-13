@@ -3,8 +3,6 @@ from itertools import permutations
 import numpy as np
 from tqdm import tqdm
 
-from src.NTSBUtils import plot_Ws
-
 
 class Perm:
     def __init__(self, map):
@@ -18,11 +16,6 @@ class Perm:
         for i in range(len(self.perms)):
             s += f"{i} -> {self.perms[i]}, "
         return s + "]"
-
-
-def get_perms(number_topics):
-    perms = permutations(range(number_topics))
-    return [Perm(p) for p in perms]
 
 
 def get_As():
@@ -69,18 +62,21 @@ def calculate_kl(p, As, Ws):
 
 
 if __name__ == '__main__':
-    As = get_As()
-    Bs = get_Bs()
+    # As = get_As()
+    # Bs = get_Bs()
+    As = generate_random(10, 1000)
+    Bs = generate_random(10, 1000)
     _, topics = As.shape
-    perms = get_perms(topics)
+    perms = permutations(range(topics))
     print("Calculating Ws...")
     Ws = calculate_Ws(As, Bs)
-    print(Ws)
+    # print(Ws)
 
     highest = -math.inf
     optimum_p = None
-    print("Going through all permutations...")
+    print(f"Going through {math.factorial(topics)} permutations...")
     for p in tqdm(perms):
+        p = Perm(p)
         tmp = 0
         for i in range(topics):
             tmp = tmp + Ws[i, p(i)]
