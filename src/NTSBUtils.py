@@ -74,14 +74,16 @@ def get_docs(dir, line=0, additional_stop_words=[]):
     stops = stopwords.words('english')
 
     docs = []
+    docs_ = []
     for f in listdir(dir):
         fd = open(dir + f)
         doc = fd.readlines()[line]
+        docs_.append(doc)
         doc = [word for word in word_tokenize(doc.lower()) if
                word.isalnum() and word not in stops and word not in additional_stop_words]
         docs.append(doc)
         fd.close()
-    return docs
+    return docs, docs_
 
 
 def get_topics_lists(cluster_word_distribution, top_clusters, n_words):
@@ -89,7 +91,8 @@ def get_topics_lists(cluster_word_distribution, top_clusters, n_words):
     for cluster in top_clusters:
         sorted_dict = sorted(cluster_word_distribution[cluster].items(),
                              key=lambda k: k[1], reverse=True)[:n_words]
-        topics.append([k for (k, v) in sorted_dict])
+        if len(sorted_dict) > 0:
+            topics.append([k for (k, v) in sorted_dict])
     return topics
 
 
